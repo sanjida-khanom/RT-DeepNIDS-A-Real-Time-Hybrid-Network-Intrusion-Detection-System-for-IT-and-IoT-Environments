@@ -1,0 +1,10 @@
+Classification Report for DT
+==================================================
+              precision    recall  f1-score   support
+
+         0.0       0.90      0.98      0.94    671022
+         1.0       0.96      0.83      0.89    429789
+
+    accuracy                           0.92   1100811
+   macro avg       0.93      0.90      0.91   1100811
+weighted avg       0.92      0.92      0.92   1100811

@@ -1,0 +1,10 @@
+Classification Report for CNN+GRU
+==================================================
+              precision    recall  f1-score   support
+
+         0.0       0.90      0.93      0.91    671022
+         1.0       0.88      0.84      0.86    429789
+
+    accuracy                           0.89   1100811
+   macro avg       0.89      0.88      0.89   1100811
+weighted avg       0.89      0.89      0.89   1100811

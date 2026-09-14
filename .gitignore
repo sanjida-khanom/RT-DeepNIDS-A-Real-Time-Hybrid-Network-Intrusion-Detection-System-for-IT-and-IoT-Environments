@@ -1,0 +1,77 @@
+# ================================
+#  Excluded folders
+# ================================
+02934b58528a226b_NFV3DATA-A11964_A11964/
+CIC-IDS-2017(Tomek+IHT vs SMOTE)/
+Demo plots/
+Methodology diagram/
+TON-IOT-V3 FL/
+
+# ================================
+#  Excluded files
+# ================================
+Capstone_Presentation_498B.pptx
+Final_Capstone_Presentation_498B.pptx
+Updated_Capstone_Presentation_498B.pptx
+Methodology diagram.pptx
+Methodology diagram.pdf
+My speech.docx
+My speech.pdf
+CIC-IDS-2017.zip
+
+# ================================
+#  Python
+# ================================
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.ipynb_checkpoints/
+
+# ================================
+#  Virtual environments
+# ================================
+.venv/
+venv/
+env/
+ENV/
+
+# ================================
+#  Datasets (GitHub 100MB file limit)
+# ================================
+*.csv
+*.parquet
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
+
+# ================================
+#  Trained model artifacts
+# ================================
+*.h5
+*.keras
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+
+# ================================
+#  Logs, IDE, OS
+# ================================
+logs/
+*.log
+.cache/
+mlruns/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+!**/Final_Results_Summary.csv
+!**/final_models_comparison.csv
+!**/final_results_comparison.csv
+!**/final_accuracy_comparison.csv
