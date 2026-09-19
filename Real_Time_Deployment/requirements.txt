@@ -1,0 +1,13 @@
+# RT-DeepNIDS — LOCAL dependencies (Python 3.13 compatible)
+streamlit
+altair
+plotly
+numpy
+pandas
+joblib
+scikit-learn
+xgboost
+tensorflow
+shap
+scapy
+wmi ; sys_platform == "win32"

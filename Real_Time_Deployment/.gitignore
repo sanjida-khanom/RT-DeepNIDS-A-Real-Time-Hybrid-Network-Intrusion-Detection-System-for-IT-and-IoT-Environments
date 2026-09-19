@@ -1,0 +1,36 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+
+# ── Virtual environments ──
+venv/
+env/
+.venv/
+
+# ── Trained model assets (too large for GitHub — keep local) ──
+Real_Time_Export/
+*.h5
+*.pkl
+*.keras
+
+# ── Datasets (never commit raw data) ──
+*.csv
+!Real_Time_Export/**/live_traffic_sample.csv
+MachineLearningCVE/
+NF-ToN-IoT-v3.csv
+
+# ── Streamlit ──
+.streamlit/secrets.toml
+
+# ── IDE / OS ──
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Plots / outputs ──
+plots/
+plot/
+*.png
