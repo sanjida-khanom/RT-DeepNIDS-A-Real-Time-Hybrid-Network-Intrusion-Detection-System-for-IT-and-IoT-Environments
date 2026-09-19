@@ -1,4 +1,4 @@
-# RT-DeepNIDS — Real-Time Deployment
+# RT-DeepNIDS: Real-Time Deployment
 
 Real-Time module of **RT-DeepNIDS: A Real-Time Hybrid Network Intrusion
 Detection System for IT and IoT Environments**.
@@ -13,9 +13,7 @@ project (Novelty 05: Real-Time Deployment).
 
 ## Live Demo
 
-A hosted version of the dashboard is deployed on **Hugging Face Spaces**:
-
-**➡️ https://sadiamehrinrahi-rt-deepnids.hf.space/**
+A hosted version of the dashboard is deployed on **Hugging Face Spaces**: **https://sadiamehrinrahi-rt-deepnids.hf.space/**
 
 The hosted demo runs in **CSV Simulation** mode (cloud environments cannot
 capture live network packets). For **live packet capture** with Scapy, run the
@@ -31,17 +29,17 @@ app locally following the setup steps below.
 ## Features
 
 - **Two traffic sources**
-  - **CSV Simulation** — replays exported test traffic through the trained
+  - **CSV Simulation:** replays exported test traffic through the trained
     models (reliable, matches training accuracy).
-  - **Live Network Interface** — captures real packets via **Scapy**, builds
+  - **Live Network Interface:** captures real packets via **Scapy**, builds
     per-flow features on the fly, and classifies them in real time.
-- **All models supported** — Decision Tree, Random Forest, XGBoost,
+- **All models supported:** Decision Tree, Random Forest, XGBoost,
   Hybrid CNN-GRU, and CNN+Transformer.
-- **Four evaluation modes** — CIC-IDS-2017, CIC-IDS-2018, ToN-IoT-v3, and
+- **Four evaluation modes:** CIC-IDS-2017, CIC-IDS-2018, ToN-IoT-v3, and
   Cross-Domain (zero-day robustness test).
-- **Cross-flow port-scan detector** — a heuristic layer that catches
+- **Cross-flow port-scan detector:** a heuristic layer that catches
   nmap / hping3 style scans before the ML model.
-- **Explainable AI (SHAP)** — every attack verdict can be explained on demand.
+- **Explainable AI (SHAP):** every attack verdict can be explained on demand.
 
 ---
 
@@ -72,7 +70,7 @@ app locally following the setup steps below.
 The trained models, scalers, and sample traffic files are hosted on Google
 Drive (too large for GitHub):
 
-**➡️ Download: <https://drive.google.com/drive/folders/10ZepJm4LTfCARxx7miAUvqdr7ClK9ym8?usp=drive_link>**
+**Download: <https://tinyurl.com/Real-Time-Export>**
 
 After downloading, place the `Real_Time_Export/` folder inside this
 `Real_Time_Deployment/` directory so the structure matches the tree above:
@@ -86,10 +84,6 @@ Real_Time_Deployment/
     ├── Tomek_IHT/ ...
     └── Cross_Validation/ ...
 ```
-
-Make sure the Drive folder is shared as **"Anyone with the link can view."**
-
----
 
 ## Setup & Run (Local)
 
@@ -158,5 +152,5 @@ therefore approximate — an inherent limitation of all real-time NIDS, not a bu
 | Sadia Mehrin Rahi | 22234103122 |
 | Istiyak Hasan Maruf | 22234103130 |
 
-Bangladesh University of Business and Technology (BUBT) — Department of Computer
-Science and Engineering.
+Bangladesh University of Business and Technology (BUBT) 
+Department of Computer Science and Engineering.
