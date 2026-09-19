@@ -4,7 +4,7 @@ Real-Time module of **RT-DeepNIDS: A Real-Time Hybrid Network Intrusion
 Detection System for IT and IoT Environments**.
 
 This directory contains the interactive **Streamlit dashboard** that serves the
-trained models for live intrusion detection — the deployment layer of the
+trained models for live intrusion detection the deployment layer of the
 project (Novelty 05: Real-Time Deployment).
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face%20Space-blue?logo=huggingface)](https://sadiamehrinrahi-rt-deepnids.hf.space/)
@@ -29,17 +29,17 @@ app locally following the setup steps below.
 ## Features
 
 - **Two traffic sources**
-  - **CSV Simulation:** replays exported test traffic through the trained
+  - **CSV Simulation:** Replays exported test traffic through the trained
     models (reliable, matches training accuracy).
-  - **Live Network Interface:** captures real packets via **Scapy**, builds
+  - **Live Network Interface:** Captures real packets via **Scapy**, builds
     per-flow features on the fly, and classifies them in real time.
 - **All models supported:** Decision Tree, Random Forest, XGBoost,
   Hybrid CNN-GRU, and CNN+Transformer.
 - **Four evaluation modes:** CIC-IDS-2017, CIC-IDS-2018, ToN-IoT-v3, and
   Cross-Domain (zero-day robustness test).
-- **Cross-flow port-scan detector:** a heuristic layer that catches
+- **Cross-flow port-scan detector:** A heuristic layer that catches
   nmap / hping3 style scans before the ML model.
-- **Explainable AI (SHAP):** every attack verdict can be explained on demand.
+- **Explainable AI (SHAP):** Every attack verdict can be explained on demand.
 
 ---
 
@@ -122,8 +122,8 @@ The dashboard opens at `http://localhost:8501`.
 1. In the sidebar, pick a **Monitoring Mode**, **Dataset**, **Balancing
    Technique**, and **Model**.
 2. Choose a **Traffic Source**:
-   - *CSV Simulation* — no admin needed, best for demos.
-   - *Live Network Interface* — select your network adapter (needs admin + Npcap).
+   - *CSV Simulation:* No admin needed, best for demos.
+   - *Live Network Interface:* Select your network adapter (needs admin + Npcap).
 3. Press **START** to begin monitoring; watch live KPIs, threat classification,
    and the traffic log.
 4. Open the **SHAP** panel to see why a verdict was made.
@@ -136,7 +136,7 @@ CSV Simulation reproduces the exact feature set used in training, so it matches
 the reported accuracy. Live capture reconstructs flow features from raw packets;
 some fields (retransmission counts, throughput aggregates, DNS/HTTP metadata)
 cannot be derived from raw packets and are imputed. Live-capture predictions are
-therefore approximate — an inherent limitation of all real-time NIDS, not a bug.
+therefore approximate an inherent limitation of all real-time NIDS, not a bug.
 
 ---
 
@@ -152,5 +152,6 @@ therefore approximate — an inherent limitation of all real-time NIDS, not a bu
 | Sadia Mehrin Rahi | 22234103122 |
 | Istiyak Hasan Maruf | 22234103130 |
 
-Bangladesh University of Business and Technology (BUBT) 
-Department of Computer Science and Engineering.
+**Bangladesh University of Business and Technology (BUBT)**
+Department of Computer Science and Engineering
+Dhaka, Bangladesh
