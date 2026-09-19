@@ -152,6 +152,11 @@ RT-DeepNIDS/
 ├── TON-IOT-V3/                       # IoT telemetry experiments
 ├── TON-IOT-V3 FL/                    # ToN-IoT feature-level variant
 ├── Cross Validation pipeline/        # Zero-day cross-dataset generalization
+├── Real_Time_Deployment/             # Live Streamlit dashboard (CSV sim + Scapy live capture)
+│   ├── app.py                        # Streamlit frontend (UI, live dashboard, SHAP panel)
+│   ├── backend.py                    # Feature engineering, flow tracking, model loading
+│   ├── requirements.txt              # Deployment dependencies
+│   └── README.md                     # Setup, usage and live-demo link
 ├── Demo plots/                       # Ablation and comparison figures
 ├── Methodology diagram/              # Architecture diagram assets
 ├── docs/                             # Manuscript, presentation, supporting material
