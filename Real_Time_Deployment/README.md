@@ -15,11 +15,16 @@ project (Novelty 05: Real-Time Deployment).
 
 A hosted version of the dashboard is deployed on **Hugging Face Spaces**:
 
-** https://sadiamehrinrahi-rt-deepnids.hf.space/**
+**➡️ https://sadiamehrinrahi-rt-deepnids.hf.space/**
 
 The hosted demo runs in **CSV Simulation** mode (cloud environments cannot
 capture live network packets). For **live packet capture** with Scapy, run the
 app locally following the setup steps below.
+
+> **Note:** In the hosted demo, the **ToN-IoT-v3 · Random Forest** model is not
+> available because its trained file exceeds the hosting storage limit (over
+> 1 GB). Every other configuration runs normally online, and the full model set
+> is available in the local deployment (see **Trained Models** below).
 
 ---
 
@@ -59,6 +64,30 @@ app locally following the setup steps below.
 > **Note:** `Real_Time_Export/` (trained `.h5` / `.pkl` model files) is **not**
 > committed to GitHub because the files exceed GitHub's size limits. Place your
 > exported models in this folder locally before running.
+
+---
+
+## Trained Models
+
+The trained models, scalers, and sample traffic files are hosted on Google
+Drive (too large for GitHub):
+
+**➡️ Download: <https://drive.google.com/drive/folders/10ZepJm4LTfCARxx7miAUvqdr7ClK9ym8?usp=drive_link>**
+
+After downloading, place the `Real_Time_Export/` folder inside this
+`Real_Time_Deployment/` directory so the structure matches the tree above:
+
+```
+Real_Time_Deployment/
+├── app.py
+├── backend.py
+└── Real_Time_Export/     ← downloaded from Drive
+    ├── SMOTE/ ...
+    ├── Tomek_IHT/ ...
+    └── Cross_Validation/ ...
+```
+
+Make sure the Drive folder is shared as **"Anyone with the link can view."**
 
 ---
 
