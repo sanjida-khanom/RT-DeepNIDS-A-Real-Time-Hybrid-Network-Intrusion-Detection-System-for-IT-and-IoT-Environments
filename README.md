@@ -260,7 +260,7 @@ Metrics, confusion matrices and ROC curves are written to the corresponding `plo
 |---|---|---|
 | **Sanjida Khanom** | Author · Project Lead, Architechture design and project plan preparation, Deep learning architecture, cross-domain evaluation , Writing lead| [@sanjida-khanom](https://github.com/sanjida-khanom) |
 | **Isitiyak Hasan Maruf** | Author · Data preprocessing and Pipeline A (SMOTE, Tomek+IHT) for dataset CIC-IDS-2017 | [@MarufKhan-ops](https://github.com/MarufKhan-ops) |
-| **Sadia Mehrin Rahi** | Author · Pipeline B (Tomek+IHT), ablation study , Real-Time-Deployment | [@SadiaMehrinRahi](https://github.com/SadiaMehrinRahi) |
+| **Sadia Mehrin Rahi** | Author · Pipeline B (Tomek+IHT), ablation study , Real-Time-Deployment | [@SadiaMehrinRahi](https://github.com/sadia-mehrin-rahi) |
 | **Ayesha Siddika** | Author · Ensemble ML baselines,Data preprocessing and Pipeline A (SMOTE) for dataset CIC-IDS-2018  | [@ayesha099-git](https://github.com/ayesha099-git) |
 
 **Supervision & Acknowledgement**
