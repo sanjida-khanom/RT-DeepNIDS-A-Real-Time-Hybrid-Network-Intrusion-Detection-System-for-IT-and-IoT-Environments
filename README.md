@@ -138,6 +138,19 @@ SHAP analysis consistently identified `protocol`, `out_bytes` and `in_bytes` as 
 
 ---
 
+## Real-Time Deployment
+
+Beyond offline training and evaluation, RT-DeepNIDS is deployed as an interactive, explainable **Streamlit dashboard** that operationalizes the trained models for live intrusion detection. The dashboard supports two inference modes, **CSV simulation**, which replays exported test traffic through the models and **live network packet capture** via Scapy, which
+extracts per-flow features from real traffic in real time. Every verdict is made transparent through on-demand **SHAP** explanations, and a cross-flow heuristic layer flags port-scan activity ahead of model inference.
+
+- **Module & setup guide:** [`Real_Time_Deployment/`](./Real_Time_Deployment)
+- **Live demo (Hugging Face Spaces):** https://sadiamehrinrahi-rt-deepnids.hf.space/
+
+> The hosted demo runs in CSV-simulation mode, as cloud environments cannot
+> capture live packets; live capture is available in the local deployment.
+
+---
+
 ## Repository Structure
 
 ```
