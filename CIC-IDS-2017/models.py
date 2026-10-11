@@ -5,19 +5,15 @@ from sklearn.ensemble import RandomForestClassifier
 import tensorflow as tf
 from tensorflow.keras import layers, models
 
-
 # ---------- Classical Models ----------
 def build_random_forest():
     return RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=-1)
 
-
 def build_decision_tree():
     return DecisionTreeClassifier(random_state=42)
 
-
 def build_xgboost():
     return XGBClassifier(n_estimators=200, max_depth=8, learning_rate=0.1, eval_metric='mlogloss', random_state=42)
-
 
 # ---------- Deep Learning: CNN + GRU ----------
 def build_cnn_gru(timesteps, n_features, n_classes):

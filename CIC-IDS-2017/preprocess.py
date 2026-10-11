@@ -9,11 +9,9 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-
 def create_plot_dir(plot_dir):
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
-
 
 def load_and_preprocess(folder_path, plot_dir, target_column="Label"):
     create_plot_dir(plot_dir)
