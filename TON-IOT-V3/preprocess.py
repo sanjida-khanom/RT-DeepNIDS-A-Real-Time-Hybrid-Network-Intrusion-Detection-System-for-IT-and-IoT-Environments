@@ -3,7 +3,8 @@ import gc
 import pandas as pd
 import numpy as np
 import matplotlib
-matplotlib.use('Agg') # Prevents plot popups
+
+matplotlib.use('Agg')  # Prevents plot popups
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -12,17 +13,17 @@ from sklearn.preprocessing import MinMaxScaler
 def save_eda_plots(df, y, plot_dir):
     """Generates and saves Countplot, Correlation Heatmap, Boxplot, and Histogram before sampling."""
     print("Saving EDA plots (Pre-sampling)...")
-    
+
     # 1. Count plot for class distribution (Fixed to avoid Seaborn errors)
     plt.figure(figsize=(10, 6))
     if isinstance(y, np.ndarray):
         y = pd.Series(y)
-    
+
     counts = y.value_counts().sort_index()
     labels = counts.index.astype(str)
     values = counts.values
     colors = plt.cm.viridis(np.linspace(0, 1, len(values)))
-    
+
     plt.bar(labels, values, color=colors)
     plt.title("Class Distribution (Before Balancing)")
     plt.xlabel("Class Label")
@@ -34,8 +35,8 @@ def save_eda_plots(df, y, plot_dir):
 
     # Sample data for heavy plots to avoid memory crash
     df_sample = df.sample(n=min(10000, len(df)), random_state=42)
-    
-    # 2. Correlation Heatmap (Top 15 features)
+
+    # Correlation Heatmap (Top 15 features)
     corr = df_sample.iloc[:, :15].corr()
     plt.figure(figsize=(12, 10))
     sns.heatmap(corr, cmap="coolwarm", annot=False)
@@ -44,7 +45,7 @@ def save_eda_plots(df, y, plot_dir):
     plt.savefig(os.path.join(plot_dir, "02_correlation_heatmap.png"))
     plt.close()
 
-    # 3. Boxplot (First 5 features to check outliers)
+    # Boxplot (First 5 features to check outliers)
     plt.figure(figsize=(12, 6))
     sns.boxplot(data=df_sample.iloc[:, :5], palette="Set2")
     plt.title("Boxplot of First 5 Features")
@@ -53,7 +54,7 @@ def save_eda_plots(df, y, plot_dir):
     plt.savefig(os.path.join(plot_dir, "03_boxplot.png"))
     plt.close()
 
-    # 4. Histogram (First 6 features)
+    # Histogram (First 6 features)
     df_sample.iloc[:, :6].hist(figsize=(12, 10), bins=30, color='skyblue', edgecolor='black')
     plt.suptitle("Histogram of First 6 Features")
     plt.tight_layout()
@@ -62,12 +63,12 @@ def save_eda_plots(df, y, plot_dir):
 
 def load_and_preprocess(file_path, target_column, plot_dir):
     print(f"Opening dataset: {file_path}")
-    
+
     # Memory optimization with systematic chunking
-    total_rows = 27000000 
-    chunk_size = 1000000 
+    total_rows = 27000000
+    chunk_size = 1000000
     chunks = []
-    
+
     print("Scanning dataset for multi-class diversity...")
     for i in range(0, total_rows, chunk_size):
         try:
@@ -79,25 +80,28 @@ def load_and_preprocess(file_path, target_column, plot_dir):
             chunks.append(chunk)
         except Exception as e:
             break
-            
+
     df = pd.concat(chunks, axis=0)
     df.columns = df.columns.str.strip()
     del chunks
-    gc.collect() 
-    
+    gc.collect()
+
     print(f"Initial Dataset shape after chunking: {df.shape}")
-    
+
     # Encode categorical target -  added to fix the factorize tuple issue
     print(f"Unique classes in '{target_column}': {df[target_column].unique()}")
-    target_series = pd.factorize(df[target_column])[0]
+
+    # <-- UPDATED: Real-Time Export এর জন্য target_names আলাদা করা হলো
+    target_series, unique_classes = pd.factorize(df[target_column])
     y = pd.Series(target_series)
-    
+    target_names = [str(c) for c in unique_classes]
+
     # Leakage Fix: Drop Timestamp, IP, and Port columns
     cols_to_drop = [
-        'IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT', 
+        'IPV4_SRC_ADDR', 'L4_SRC_PORT', 'IPV4_DST_ADDR', 'L4_DST_PORT',
         'FLOW_START_MILLISECONDS', 'FLOW_END_MILLISECONDS', 'FLOW_DURATION_MILLISECONDS'
     ]
-    
+
     df_numeric = df.select_dtypes(include=[np.number])
     existing_drops = [c for c in cols_to_drop if c in df_numeric.columns]
     df_numeric.drop(columns=existing_drops, inplace=True, errors='ignore')
@@ -106,8 +110,7 @@ def load_and_preprocess(file_path, target_column, plot_dir):
     X = df_numeric
     if target_column in X.columns:
         X = X.drop(columns=[target_column])
-    y = target_series
-    
+
     del df, df_numeric
     gc.collect()
 
@@ -123,8 +126,9 @@ def load_and_preprocess(file_path, target_column, plot_dir):
     # Train, Validation, Test Split (Stratified to maintain class ratio)
     print("Splitting data into Train, Validation, and Test sets...")
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.15, random_state=42, stratify=y)
-    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.1765, random_state=42, stratify=y_temp)
-    
+    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.1765, random_state=42,
+                                                      stratify=y_temp)
+
     print(f"Train shape: {X_train.shape}, Val shape: {X_val.shape}, Test shape: {X_test.shape}")
 
     # Scale the features (Fit only on Train to prevent Data Leakage)
@@ -136,5 +140,5 @@ def load_and_preprocess(file_path, target_column, plot_dir):
     del X_temp
     gc.collect()
 
-    # Returning un-sampled scaled data
-    return X_train_scaled, y_train, X_val_scaled, y_val, X_test_scaled, y_test, X.columns
+    # <-- UPDATED: Returning un-sampled scaled data PLUS export assets (scaler, names, raw X_test)
+    return X_train_scaled, y_train, X_val_scaled, y_val, X_test_scaled, y_test, X.columns, scaler, target_names, X_test

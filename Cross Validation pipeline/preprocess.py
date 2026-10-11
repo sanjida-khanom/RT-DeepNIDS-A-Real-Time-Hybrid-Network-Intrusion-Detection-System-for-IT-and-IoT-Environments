@@ -1,5 +1,6 @@
 import matplotlib
-matplotlib.use('Agg') 
+
+matplotlib.use('Agg')
 
 import os
 import pandas as pd
@@ -13,7 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import train_test_split
 
-BASE_PATH = r"D:\Capstone project\Cross Validation pipeline\plots"
+BASE_PATH = r"C:\Capstone project\Cross Validation pipeline\plots"
 os.makedirs(BASE_PATH, exist_ok=True)
 
 # ----------------- VISUALIZATION HELPERS -----------------
@@ -47,7 +48,7 @@ def plot_hist_box(df, title_prefix):
     numeric_df = df.select_dtypes(include=[np.number])
     if len(numeric_df.columns) == 0: return
     top_features = numeric_df.var().nlargest(min(5, len(numeric_df.columns))).index
-    
+
     plt.figure(figsize=(15, 10))
     for i, col in enumerate(top_features, 1):
         plt.subplot(2, 3, i)
@@ -66,7 +67,7 @@ def plot_all_eda(df, y, stage_name):
     """Generates and saves all requested plots for a specific stage."""
     print(f"   -> Saving EDA plots for: {stage_name}")
     plot_class_distribution(y, f"{stage_name}_Class_Distribution")
-    
+
     # Drop labels from DF for correlation/histograms if present
     df_features = df.select_dtypes(include=[np.number])
     if not df_features.empty:
@@ -106,7 +107,7 @@ def apply_feature_engineering(X_train, X_test):
     constant_columns = [col for col in X_train.columns if col not in X_train.columns[var_thres.get_support()]]
     X_train.drop(columns=constant_columns, inplace=True, errors='ignore')
     X_test.drop(columns=constant_columns, inplace=True, errors='ignore')
-    
+
     corr_matrix = X_train.corr().abs()
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
     to_drop = [column for column in upper.columns if any(upper[column] > 0.85)]
@@ -131,7 +132,8 @@ def load_parquet_folder_sampled(folder_path, sample_per_file=20000):
             df = pd.read_parquet(os.path.join(folder_path, file), engine='pyarrow')
             if len(df) > sample_per_file: df = df.sample(n=sample_per_file, random_state=42)
             chunks.append(df)
-        except: pass
+        except:
+            pass
     return pd.concat(chunks, axis=0, ignore_index=True) if chunks else pd.DataFrame()
 
 def load_sampled_csv(file_path, sample_fraction=0.05, chunksize=200000):
@@ -146,28 +148,30 @@ def load_and_preprocess(path_2017, path_2018, path_ton_iot):
     df_2017 = load_csv_folder_sampled(path_2017, sample_fraction=0.10)
     y_2017_raw = clean_labels(df_2017.iloc[:, -1])
     plot_all_eda(df_2017.iloc[:, :-1], y_2017_raw, "1A_CIC_IDS_2017_Individual")
-    
+
     df_2018 = load_parquet_folder_sampled(path_2018, sample_per_file=20000)
     y_2018_raw = clean_labels(df_2018.iloc[:, -1])
     plot_all_eda(df_2018.iloc[:, :-1], y_2018_raw, "1B_CIC_IDS_2018_Individual")
-    
+
     y_2017 = clean_labels(df_2017.pop(df_2017.columns[-1]))
     y_2018 = clean_labels(df_2018.pop(df_2018.columns[-1]))
     X_train_raw = pd.concat([df_2017, df_2018], axis=0, ignore_index=True)
     y_train_raw = pd.concat([pd.Series(y_2017), pd.Series(y_2018)], axis=0, ignore_index=True)
-    del df_2017, df_2018; gc.collect()
+    del df_2017, df_2018;
+    gc.collect()
 
     print("\n>>> PREPARING TARGET DATA (ToN-IoT) <<<")
     X_ton_raw = load_sampled_csv(path_ton_iot, sample_fraction=0.05)
     target_ton = 'Attack' if 'Attack' in X_ton_raw.columns else X_ton_raw.columns[-1]
     y_ton_raw_plot = clean_labels(X_ton_raw[target_ton])
     plot_all_eda(X_ton_raw.drop(columns=[target_ton]), y_ton_raw_plot, "1C_ToN_IoT_Individual")
-    
+
     y_ton_raw = clean_labels(X_ton_raw.pop(target_ton))
 
     print("\n--- Feature Alignment & Preprocessing ---")
     X_train_aligned, X_ton_aligned = align_features(X_train_raw, X_ton_raw)
-    del X_train_raw, X_ton_raw; gc.collect()
+    del X_train_raw, X_ton_raw;
+    gc.collect()
 
     X_train_clean = drop_leakage_columns(X_train_aligned)
     X_ton_clean = drop_leakage_columns(X_ton_aligned)
@@ -194,8 +198,9 @@ def load_and_preprocess(path_2017, path_2018, path_ton_iot):
     print("\n--- Applying Tomek Links & IHT ---")
     tl = TomekLinks(n_jobs=-1)
     X_train_tl, y_train_tl = tl.fit_resample(X_train_scaled, y_train_raw)
-    
-    iht = InstanceHardnessThreshold(estimator=RandomForestClassifier(n_estimators=10, random_state=42), random_state=42, n_jobs=-1)
+
+    iht = InstanceHardnessThreshold(estimator=RandomForestClassifier(n_estimators=10, random_state=42), random_state=42,
+                                    n_jobs=-1)
     X_train_res, y_train_res = iht.fit_resample(X_train_tl, y_train_tl)
 
     print("\n--- Generating Plots AFTER Tomek+IHT ---")
@@ -206,5 +211,6 @@ def load_and_preprocess(path_2017, path_2018, path_ton_iot):
     X_ton_train, X_ton_test, y_ton_train, y_ton_test = train_test_split(
         X_ton_scaled, y_ton_raw, test_size=0.80, random_state=42, stratify=y_ton_raw
     )
-    
-    return X_train_res, y_train_res, X_ton_train, X_ton_test, y_ton_train, y_ton_test, feature_names
+
+    # <-- UPDATED: Real-Time Export এর জন্য scaler এবং র-টেস্ট ডেটা (X_ton_clean) রিটার্ন করা হলো
+    return X_train_res, y_train_res, X_ton_train, X_ton_test, y_ton_train, y_ton_test, feature_names, scaler, X_ton_clean

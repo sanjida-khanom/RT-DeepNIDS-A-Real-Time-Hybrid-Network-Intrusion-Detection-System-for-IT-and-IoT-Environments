@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use('Agg')  # MUST BE FIRST. Completely disables GUI popups.
 
 import os
@@ -13,19 +14,41 @@ from sklearn.utils.class_weight import compute_class_weight
 import shap
 import lime
 import lime.lime_tabular
+import joblib  # <-- NEW: For Exporting ML Models and Scalers
 
 from preprocess import load_and_preprocess
 from models import build_random_forest, build_decision_tree, build_xgboost, build_cnn_gru, build_cnn_transformer
 
 # --------- CONFIGURATION ---------
-BASE_PATH = r"D:\Capstone project\Cross Validation pipeline\plots"
+BASE_PATH = r"C:\Capstone Project\Cross Validation pipeline\plots"
 os.makedirs(BASE_PATH, exist_ok=True)
 
-PATH_2017 = r"D:\Capstone project\CIC-IDS-2017\MachineLearningCVE"
-PATH_2018 = r"D:\Capstone project\CIC-IDS-2018\CIC-IDS-2018"
-PATH_TON = r"D:\Capstone project\TON-IOT-V3\NF-ToN-IoT-v3.csv"
+PATH_2017 = r"C:\Capstone Project\CIC-IDS-2017\MachineLearningCVE"
+PATH_2018 = r"C:\Capstone Project\CIC-IDS-2018\CIC-IDS-2018"
+PATH_TON = r"C:\Capstone Project\TON-IOT-V3\NF-ToN-IoT-v3.csv"
 
-# --------- VISUALIZATION HELPERS ---------
+# <-- NEW: Export Directories for Live UI Dashboard
+EXPORT_DIR = r"C:\Capstone Project\Real_Time_Export\Cross_Validation"
+os.makedirs(EXPORT_DIR, exist_ok=True)
+
+# --------- HELPER FUNCTIONS ---------
+# <-- NEW: Function to save scaling and sample data for Real-Time Execution
+def save_supporting_files(export_path, scaler, target_names, X_test_raw):
+    os.makedirs(export_path, exist_ok=True)
+    model_types = {
+        'DT': 'ML',
+        'RF': 'ML',
+        'XGB': 'ML',
+        'CNN_GRU': 'DL',
+        'CNN_Transformer': 'DL'
+    }
+    joblib.dump(scaler, os.path.join(export_path, "scaler.pkl"))
+    joblib.dump(target_names, os.path.join(export_path, "target_names.pkl"))
+    joblib.dump(model_types, os.path.join(export_path, "model_types.pkl"))
+    X_test_raw.head(100).to_csv(os.path.join(export_path, "live_traffic_sample.csv"), index=False)
+    print(f"\n-> Saved supporting runtime UI files to: {export_path}")
+
+
 def save_plot(title):
     file_path = os.path.join(BASE_PATH, f"{title}.png")
     plt.tight_layout()
@@ -64,22 +87,23 @@ def plot_model_comparison(results):
     width = 0.35
 
     fig, ax1 = plt.subplots(figsize=(10, 6))
-    bars1 = ax1.bar(x - width/2, accuracies, width, label='Accuracy (%)', color='skyblue')
+    bars1 = ax1.bar(x - width / 2, accuracies, width, label='Accuracy (%)', color='skyblue')
     ax1.set_ylabel('Accuracy (%)')
     ax1.set_title('Model Performance Comparison (Accuracy vs AUC)')
     ax1.set_xticks(x)
     ax1.set_xticklabels(models)
 
     ax2 = ax1.twinx()
-    bars2 = ax2.bar(x + width/2, aucs, width, label='AUC Score', color='lightgreen')
+    bars2 = ax2.bar(x + width / 2, aucs, width, label='AUC Score', color='lightgreen')
     ax2.set_ylabel('AUC Score')
 
     fig.legend(loc="upper right", bbox_to_anchor=(0.9, 0.9))
     save_plot("Model_Comparison_Bar_Chart")
 
+
 def plot_individual_metrics(results):
     models = [res['Model'] for res in results]
-    
+
     # 1. Accuracy Comparison
     plt.figure(figsize=(8, 5))
     sns.barplot(x=models, y=[res['Accuracy'] * 100 for res in results], hue=models, palette='viridis', legend=False)
@@ -115,15 +139,21 @@ def main():
     global trained_xgb_model
     trained_xgb_model = None
 
-    # Load data for Transfer Learning
-    X_train_source, y_train_source, X_ton_train, X_ton_test, y_ton_train, y_ton_test, feature_names = load_and_preprocess(PATH_2017, PATH_2018, PATH_TON)
+    # <-- UPDATED: Receiving new assets
+    X_train_source, y_train_source, X_ton_train, X_ton_test, y_ton_train, y_ton_test, feature_names, scaler, X_test_raw = load_and_preprocess(
+        PATH_2017, PATH_2018, PATH_TON)
+
+    # <-- NEW: Setup Target Names and Save UI Assets
+    target_names = ['Benign', 'Attack']  # Since clean_labels sets Benign=0, Attack=1
+    save_supporting_files(EXPORT_DIR, scaler, target_names, X_test_raw)
 
     # Base Training Validation Split
-    X_train_dl, X_val_dl, y_train_dl, y_val_dl = train_test_split(X_train_source, y_train_source, test_size=0.15, random_state=42, stratify=y_train_source)
+    X_train_dl, X_val_dl, y_train_dl, y_val_dl = train_test_split(X_train_source, y_train_source, test_size=0.15,
+                                                                  random_state=42, stratify=y_train_source)
 
     n_features = X_train_source.shape[1]
     timesteps = 1
-    
+
     # Strictly convert to Numpy Arrays to fix "unknown rank" errors in Deep Learning models
     X_train_seq = np.array(X_train_dl).reshape((-1, timesteps, n_features)).astype('float32')
     X_val_seq = np.array(X_val_dl).reshape((-1, timesteps, n_features)).astype('float32')
@@ -146,12 +176,13 @@ def main():
         global trained_xgb_model
         print(f"\n>> Training {name}...")
         start_train = time.time()
-        
+
         if is_dl:
             early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
             print(f"   -> Phase 1: Base Training on Source Domain (CIC-IDS)")
-            model.fit(X_train_seq, y_train_dl, validation_data=(X_val_seq, y_val_dl), epochs=15, batch_size=256, callbacks=[early_stop], verbose=1)
-            
+            model.fit(X_train_seq, y_train_dl, validation_data=(X_val_seq, y_val_dl), epochs=15, batch_size=256,
+                      callbacks=[early_stop], verbose=1)
+
             print(f"   -> Phase 2: Fine-Tuning on Target Domain (ToN-IoT)")
             model.optimizer.learning_rate.assign(0.0001)
             model.fit(X_ton_train_seq, y_ton_train, epochs=5, batch_size=128, class_weight=class_weights, verbose=1)
@@ -159,34 +190,47 @@ def main():
             print(f"   -> Training on Combined Source + Target Train Data")
             model.fit(X_combined_ml, y_combined_ml)
             if name == 'XGB': trained_xgb_model = model
-            
+
         train_time = time.time() - start_train
-        
+
         print(f">> Final Testing {name} on Unseen NF-ToN-IoT-v3...")
         start_test = time.time()
-        
+
         if is_dl:
             y_prob = model.predict(X_ton_test_seq).ravel()
             y_pred = (y_prob > 0.5).astype(int)
         else:
             y_pred = model.predict(X_ton_test)
             y_prob = model.predict_proba(X_ton_test)[:, 1]
-            
+
         test_time = time.time() - start_test
-        
+
         acc = accuracy_score(y_ton_test, y_pred)
         auc = roc_auc_score(y_ton_test, y_prob)
         fpr, tpr, _ = roc_curve(y_ton_test, y_prob)
         roc_data[name] = {'fpr': fpr, 'tpr': tpr, 'auc': auc}
-        
+
         report = classification_report(y_ton_test, y_pred, zero_division=0)
         with open(os.path.join(BASE_PATH, f"Classification_Report_{name}.txt"), "w") as f:
             f.write(f"Classification Report for {name}\n")
-            f.write("="*50 + "\n")
+            f.write("=" * 50 + "\n")
             f.write(report)
-            
+
         plot_confusion(y_ton_test, y_pred, name)
-        print(f"[{name}] Completed. Final Accuracy: {acc*100:.2f}% | AUC: {auc:.4f}")
+
+        # <-- NEW: Export Model Logic for Real Time Testing
+        name_map = {
+            'RF': 'RF', 'DT': 'DT', 'XGB': 'XGB',
+            'CNN+GRU': 'CNN_GRU', 'CNN+Transformer': 'CNN_Transformer'
+        }
+        short_name = name_map.get(name, name)
+
+        if is_dl:
+            model.save(os.path.join(EXPORT_DIR, f"{short_name}_model.h5"))
+        else:
+            joblib.dump(model, os.path.join(EXPORT_DIR, f"{short_name}_model.pkl"))
+
+        print(f"[{name}] Completed. Final Accuracy: {acc * 100:.2f}% | AUC: {auc:.4f}")
         return {'Model': name, 'Accuracy': acc, 'AUC': auc, 'TrainTime(s)': train_time, 'TestTime(s)': test_time}
 
     for m_func, m_name in zip([build_random_forest, build_decision_tree, build_xgboost], ['RF', 'DT', 'XGB']):
@@ -204,21 +248,20 @@ def main():
         shap.summary_plot(shap_values, X_ton_test[:500], feature_names=feature_names, show=False)
         save_plot("SHAP_Feature_Importance")
 
-        
-       
-
     # Final Summary Visualizations
     plot_combined_roc(roc_data)
     plot_model_comparison(results)
     plot_individual_metrics(results)
 
-    print("\n" + "="*95)
+    print("\n" + "=" * 95)
     print(f"{'Model':<18} | {'Final Test Accuracy':<23} | {'AUC':<10} | {'Train(s)':<12} | {'Test(s)':<10}")
     print("-" * 95)
     for res in results:
-        print(f"{res['Model']:<18} | {res['Accuracy']*100:>15.2f}%         | {res['AUC']:>10.4f} | {res['TrainTime(s)']:>12.2f} | {res['TestTime(s)']:>10.2f}")
-    print("="*95)
+        print(
+            f"{res['Model']:<18} | {res['Accuracy'] * 100:>15.2f}%         | {res['AUC']:>10.4f} | {res['TrainTime(s)']:>12.2f} | {res['TestTime(s)']:>10.2f}")
+    print("=" * 95)
     print(f"\nALL PLOTS AND REPORTS SUCCESSFULLY SAVED TO: {BASE_PATH}")
+    print(f"MODELS AND EXPORT ASSETS SAVED TO: {EXPORT_DIR}")
 
 if __name__ == "__main__":
     main()
